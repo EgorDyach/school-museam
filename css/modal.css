@@ -1,0 +1,139 @@
+.modal {
+    --transition-time: 0.3s;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1999999999999;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    overflow-y: auto;
+    overflow-x: hidden;
+    text-align: center;
+    transition: opacity var(--transition-time), visibility var(--transition-time);
+    opacity: 0;
+    visibility: hidden;
+    align-items: center;
+    display: flex;
+  }
+  
+  .modal::before {
+    content: "";
+    vertical-align: middle;
+    height: 100%;
+  }
+  
+  .modal__container {
+    position: relative;
+    width: 700px;
+    margin: 50px auto;
+    vertical-align: middle;
+    background-color: #fff;
+    cursor: default;
+  }
+  
+  .modal-img {
+    align-self: center;
+    width: 60%;
+    background-image: url(/img/global/gallary/modal.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    max-height: 550px;
+  }
+  
+  .modal-content {
+    padding: 70px 50px;
+    text-align: center;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+  
+  .modal-title {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 33px;
+    margin: 0;
+    margin-bottom: 5px;
+  }
+  
+  .modal-picture-name {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 22px;
+    margin: 0;
+    margin-bottom: 5px;
+  }
+  
+  .modal-date {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #999999;
+    margin: 0;
+    margin-bottom: 40px;
+  }
+  
+  .modal-descr {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    margin: 0;
+    max-width: 400px;
+  }
+  
+  .modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--transition-time), visibility var(--transition-time);
+  }
+  
+  .modal__container.modal-open {
+    display: inline-flex;
+  }
+  
+  .fade {
+    opacity: 0;
+    transition: opacity var(--transition-time);
+  }
+  
+  .fade.animate-open {
+    opacity: 1;
+    transition: opacity var(--transition-time);
+  }
+  
+  .fadeInUp {
+    opacity: 0;
+    transform: translateY(-100px);
+    transition: opacity var(--transition-time), transform var(--transition-time);
+  }
+  
+  .fadeInUp.animate-open {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--transition-time), transform var(--transition-time);
+  }
+  
+  .content {
+    min-height: 200vh;
+  }
+  
+  .disable-scroll {
+    position: relative;
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  

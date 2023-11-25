@@ -1,0 +1,207 @@
+.excursions__title {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 42px;
+  margin-bottom: 28px;
+  color: #000000;
+}
+
+.excursions__con .swiper {
+  max-width: 1500px;
+  max-height: 600px;
+}
+
+.excursions__con {
+  position: relative;
+}
+
+.excursion__img {
+  background-image: url(https://lh3.googleusercontent.com/fife/AMPSemc7NUvCL0eq1UPfj4X8MbLWFhics60NQ4dZZtsTXkoGi75413Jqdqtw09Urh5XuhvnjIsoIBWW51gRdGx0emIJbd4zvYhBjKJISkJIFvXohMcR_wgK0jcO_p4rbFRUhxYWKy_tkSs4wOt-ihJOSzU7PNhg1tkdGZUG5tu16cVKFOGF3nkYy8kbrk1MN4En_Go3LTtzDj8y-442sZ3KqpT_VreywydkgtX8QvmYCzhU1xPeHgniIBAFOnCNP-7za41WaEOx3jXzF19_k9zHCMSLvxjMxjzWx771lRdggYl57S4C5Sa9gGUawfkfIYBbdOn76rWFr4d_NkXxSYa45KQxy1jshbWawKIvYN932V7Wb7szoqIYQY0dqZ2_Q4j7-wx-denpf7ADYkCDzq9uMOdMM0ZspfUhWGTqUo-qruxZKj3eOvTtkUSgGrufJCicgoy-zN7MbeOyTU8hBVgs7JNGWuTxIAWEQg7zdwLw_KbrsfpPzwdbBj7cZ3qMITFRldRN3DaDkpR0HrA-mI3IqWwzAZoG6jx8H41xr5l5ctWLDWai14DS-XScjKfLDnseweaNjgHpvEzaBZ3ie-1-NrN_SpPNFGqyC3PQbzQZJLvz4VzfSuc29eSRvCOPl-1yW3GtgFycyqRiBmVGgm3KkD_m2hgsCkxI0J3JcpHgTfsNaDgIz_ZrGVUR4oX4lxckhBtsDiRa_K2G_RrCDrjADSt7hn74xc0iKxEVTHuuis0YXCtp8k0G8CR2GR3FUe3-FBaBenkoh8qav-HABuncMehZstNnmP5_EUA9zBwFTMRWkiPVpP6oqq8FpXFpadhaup7clm8qXkhNnimhejUls6uyEGgYHa2O_WvLcZkJN4fYQu6Enr-6yXMmPd_3sxWhgLK9UZUlYQWYVVfiQT50M1f3IuMAIOprnwhtBNiodFkzoTlhg5lGLGu0KzMCcbGTawVneSw7C64EHcsWImpwD01B4VSfNk2q_nDeuWicyI2n-K9EC1t-Wq8EYL3TF5E3U4Rtey4GzGCWnMtoe-fQ2GpPMcOMeaUn3A1WTHBrXUFARmwiwK_j-CVrDL6q4wHLayx8pNmEyOtmIVS1Iiqv7021LGVWTHJpwPsbPQIbfZfZHgDcMRssQW4yZJrX-KRKkz66PRXYfuklpcStKDJ1zd-85PiODvMTqDYED-di-KUtmIbKXhjxLVYN8KloQkiQ9G60UnOq9nX9kpotrsb7TWCEcZjuWpW78NGV0TaxLdxcSa7pNTnFDBKIUxMMU0Cz0LjuUkSwAOdkglk69KNBTTIdpjqqtz2UMY5aqL3OdStApzJ437HnmS8Awe92JXJGMD8N2ouacO3pqX-GA7He43ru2yJBAYIIZ18nPoOhTBc33onRKfD6KdkwBS8WYz_eoS5ADRiBHjt9iKG5TsY2TYtHQ29AMfvan8h0et3vlLvHjq9E-9q54R_vqKg8hh8TeWqwbPt9cCRi2rf0YRa5zBQ=w1920-h904);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  width: 100%;
+  border-radius: 20px;
+  min-height: 460px;
+}
+
+.excursion {
+  border-radius: 20px;
+  background-color: #447774;
+  justify-content: space-between;
+}
+
+.swiper-slide.exursion {
+  border-radius: 20px;
+  background-color: #447774;
+  justify-content: space-between;
+}
+
+.excursions {
+  padding-bottom: 75px;
+}
+
+.excursion__info {
+  padding: 45px 66px 33px 56px;
+  display: flex;
+  flex-direction: column;
+  max-width: 40%;
+  justify-content: space-between;
+}
+
+.excursion__title {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 38px;
+  margin-bottom: 38px;
+  color: #ffffff;
+}
+
+.excursion__descr {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  /* or 150% */
+  text-align: justify;
+  color: #ffffff;
+}
+
+.excursion__date {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 18px;
+
+  color: #ffffff;
+}
+.swiper-button-prev::after {
+  content: none;
+}
+
+.swiper-button-next::after {
+  content: none;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  width: 50px;
+  height: 50px;
+}
+
+.swiper-button-next {
+  right: -5px;
+}
+
+.swiper-button-prev {
+  left: -5px;
+}
+
+.gallary__swiper-navigation {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.swiper-pagination {
+  text-align: center;
+  color: #fff;
+  top: -15px;
+  left: -4px;
+  z-index: 9;
+}
+
+.gallary__swiper-nav-btn::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 7px / 2);
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+.gallary__swiper-nav-btn.swiper-button-disabled {
+  cursor: auto;
+  background-color: #666666;
+}
+
+.gallary__swiper-nav-btn:focus:not(:active) {
+  outline: 2px solid #000000;
+  outline-offset: -2px;
+}
+
+.gallary__swiper-nav-prev {
+  margin-right: 82px;
+  left: 3px;
+}
+
+.gallary__swiper-nav-next::before {
+  left: calc(50% - 7px / 2);
+  border-top: 1px solid #fff;
+  border-right: 1px solid #fff;
+}
+
+.gallary__swiper-nav-prev::before {
+  left: calc(50% - 7px / 2);
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.gallary__swiper-nav-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background-color: var(--med__purple);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 1360px) {
+  .excursion__title {
+    font-size: 26px;
+    line-height: 38px;
+    margin-bottom: 18px;
+  }
+
+  .excursion__descr {
+    font-size: 14px;
+  }
+
+  .swiper-button-next {
+    right: -25px;
+  }
+
+  .swiper-button-prev {
+    left: -25px;
+  }
+}
+
+@media (max-width:920px) {
+  .excursions__con .swiper {
+    max-height: 100%;
+  }
+
+  .swiper-slide.exursion {
+    flex-direction: column-reverse;
+  }
+
+  .excursion__info {
+    max-width: 100%;
+    padding: 35px 40px 33px 40px;
+  }
+}
+
+@media (max-width: 650px) {
+  .swiper-button-prev {
+    left: 0;
+  }
+  .swiper-button-next {
+    right: 0;
+  }
+}

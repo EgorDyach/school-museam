@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Музей школы 23</title>
+    <!-- ?FAVICON -->
+    <link rel="shortcut icon" href="/img/favicon.png" type="image/x-icon">
+    <!-- !======================================================================== -->
+    <!-- ?JS -->
+    <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js" defer></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js" defer></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" defer></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=вашAPI-ключ&lang=ru_RU" defer></script>
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.querySelector(".container")
+            const swiperhero = new Swiper('.hero__swiper', {
+                // Default parameters
+                loop: true,
+                effect: 'fade',
+                speed: 3000,
+                autoplay: {
+                    delay: 3000
+                }
+
+            });
+
+            const swiperhist = new Swiper('.history__swiper', {
+                // Default parameters
+                loop: true,
+                effect: 'lazy',
+                speed: 600,
+                autoplay: {
+                    delay: 3500
+                }
+            });
+
+
+            $(function () {
+                $(".accordion-list").accordion({
+                    icons: false,
+                    heightStyle: "content",
+                    collapsible: true,
+                    active: 0,
+                });
+            });
+
+            document.querySelectorAll('.accordion-link').forEach(function (tabsbtn) {
+                tabsbtn.addEventListener('click', function (e) {
+                    const path = e.currentTarget.dataset.painterspath;
+
+                    document.querySelectorAll('.accordion-link').forEach(function (link) {
+                        link.classList.remove('accordion-link-active')
+                    });
+                    e.currentTarget.classList.add('accordion-link-active');
+                    console.log('dqq');
+                    document.querySelectorAll('.tab').forEach(function (tabcontent) {
+                        tabcontent.classList.remove('tab-active');
+                    });
+                    document.querySelector(`[data-painterstarget="${path}"]`).classList.add('tab-active');
+                    // document.querySelector(`[data-target="${path}"]`).scrollIntoView({
+                    //   behavior: 'smooth',
+                    //   block: 'start',
+                    //   speed: 600
+                    // });
+                });
+            });
+
+            var excswiper = new Swiper(".excur__swiper", {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                loop: true,
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+            });
+
+            $(document).ready(function () {
+                $(".news__item").slice(0, 4).show();
+                $("#loadMore").on("click", function (e) {
+                    e.preventDefault();
+                    $(".news__item:hidden").slice(0, 4).slideDown();
+                    if ($(".news__item:hidden").length == 0) {
+                        $("#loadMore").text("Событий больше нет :(").addClass("noContent");
+                    }
+                });
+
+
+            });
+
+            ymaps.ready(init);
+            function init() {
+                var myMap = new ymaps.Map("map", {
+                    center: [48.05580154596674, 39.94504829419179],
+                    zoom: 16,
+                });
+
+                var myPlacemark = new ymaps.Placemark([48.05580154596674, 39.94504829419179], {}, {
+                    iconLayout: 'default#image',
+                    iconImageHref: 'img/mark.svg',
+                    iconImageSize: [20, 40],
+                    iconImageOffset: [-3, -42]
+                });
+
+                myMap.geoObjects.add(myPlacemark);
+                myMap.behaviors.disable('scrollZoom');
+            };
+
+            class Modal {
+                constructor(options) {
+                    let defaultOptions = {
+                        isOpen: () => { },
+                        isClose: () => { },
+                    }
+                    this.options = Object.assign(defaultOptions, options);
+                    this.modal = document.querySelector('.modal');
+                    this.speed = false;
+                    this.animation = false;
+                    this.isOpen = false;
+                    this.modalContainer = false;
+                    this.previousActiveElement = false;
+                    this.fixBlocks = document.querySelectorAll('.fix-block');
+                    this.focusElements = [
+                        'a[href]',
+                        'input',
+                        'button',
+                        'select',
+                        'textarea',
+                        '[tabindex]'
+                    ];
+                    this.events();
+                }
+
+                events() {
+                    if (this.modal) {
+                        document.addEventListener('click', function (e) {
+                            const clickedElement = e.target.closest('[data-path]');
+                            if (clickedElement) {
+                                let target = clickedElement.dataset.path;
+                                let animation = clickedElement.dataset.animation;
+                                let speed = clickedElement.dataset.speed;
+                                this.animation = animation ? animation : 'fade';
+                                this.speed = speed ? parseInt(speed) : 300;
+                                this.modalContainer = document.querySelector(`[data-target="${target}"]`);
+                                this.open();
+                                return;
+                            }
+
+                            if (e.target.closest('.modal-close')) {
+                                this.close();
+                                return;
+                            }
+                        }.bind(this));
+
+                        window.addEventListener('keydown', function (e) {
+                            if (e.keyCode == 27) {
+                                if (this.isOpen) {
+                                    this.close();
+                                }
+                            }
+
+                            if (e.keyCode == 9 && this.isOpen) {
+                                this.focusCatch(e);
+                                return;
+                            }
+
+                        }.bind(this));
+
+                        this.modal.addEventListener('click', function (e) {
+                            if (!e.target.classList.contains('modal__container') && !e.target.closest('.modal__container') && this.isOpen) {
+                                this.close();
+                            }
+                        }.bind(this));
+                    }
+                }
+
+                open() {
+                    this.previousActiveElement = document.activeElement;
+
+                    this.modal.style.setProperty('--transition-time', `${this.speed / 1000}s`);
+                    this.modal.classList.add('is-open');
+                    this.disableScroll();
+
+                    this.modalContainer.classList.add('modal-open');
+                    // this.modalContainer.classList.add(this.animation);
+
+                    setTimeout(() => {
+                        this.options.isOpen(this);
+                        this.modalContainer.classList.add('animate-open');
+                        this.isOpen = true;
+                        this.focusTrap();
+                    }, this.speed);
+                }
+
+                close() {
+                    if (this.modalContainer) {
+                        this.modalContainer.classList.remove('animate-open');
+                        this.modalContainer.classList.remove(this.animation);
+                        this.modal.classList.remove('is-open');
+                        this.modalContainer.classList.remove('modal-open');
+
+                        this.enableScroll();
+                        this.options.isClose(this);
+                        this.isOpen = false;
+                        this.focusTrap();
+                    }
+                }
+
+                focusCatch(e) {
+                    const focusable = this.modalContainer.querySelectorAll(this.focusElements);
+                    const focusArray = Array.prototype.slice.call(focusable);
+                    const focusedIndex = focusArray.indexOf(document.activeElement);
+
+                    if (e.shiftKey && focusedIndex === 0) {
+                        focusArray[focusArray.length - 1].focus();
+                        e.preventDefault();
+                    }
+
+                    if (!e.shiftKey && focusedIndex === focusArray.length - 1) {
+                        focusArray[0].focus();
+                        e.preventDefault();
+                    }
+                }
+
+                focusTrap() {
+                    const focusable = this.modalContainer.querySelectorAll(this.focusElements);
+                    if (this.isOpen) {
+                        focusable[0].focus();
+                    } else {
+                        this.previousActiveElement.focus();
+                    }
+                }
+
+                disableScroll() {
+                    let pagePosition = window.scrollY;
+                    this.lockPadding();
+                    document.body.classList.add('disable-scroll');
+                    document.body.dataset.position = pagePosition;
+                    document.body.style.top = -pagePosition + 'px';
+                }
+
+                enableScroll() {
+                    let pagePosition = parseInt(document.body.dataset.position, 10);
+                    this.unlockPadding();
+                    document.body.style.top = 'auto';
+                    document.body.classList.remove('disable-scroll');
+                    window.scroll({ top: pagePosition, left: 0 });
+                    document.body.removeAttribute('data-position');
+                }
+
+                lockPadding() {
+                    let paddingOffset = window.innerWidth - document.body.offsetWidth + 'px';
+                    this.fixBlocks.forEach((el) => {
+                        el.style.paddingRight = paddingOffset;
+                    });
+                    document.body.style.paddingRight = paddingOffset;
+                }
+
+                unlockPadding() {
+                    this.fixBlocks.forEach((el) => {
+                        el.style.paddingRight = '0px';
+                    });
+                    document.body.style.paddingRight = '0px';
+                }
+            }
+
+            const modal = new Modal({
+                isOpen: (modal) => {
+                    console.log(modal);
+                    console.log('opened');
+                },
+                isClose: () => {
+                    console.log('closed');
+                },
+            });
+
+            let burger = document.querySelector('.header__burger');
+            let menu = document.querySelector('.header__nav');
+            let menulinks = menu.querySelectorAll('.header__link');
+
+            burger.addEventListener('click',
+
+                function () {
+
+                    burger.classList.toggle('header__burger-active');
+
+                    menu.classList.toggle('header__nav-active');
+
+                    document.body.classList.toggle('stop-scroll');
+                })
+
+            menulinks.forEach(function (el) {
+                el.addEventListener('click', function () {
+
+                    burger.classList.remove('header__burger--active');
+
+                    menu.classList.remove('header__nav--active');
+
+                    document.body.classList.remove('stop-scroll');
+
+                })
+            });
+        })
+    </script>
+    <!-- !======================================================================== -->
+    <!-- ?CSS -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="css/hero.css">
+    <link rel="stylesheet" href="/css/halls.css">
+    <link rel="stylesheet" href="/css/history.css">
+    <link rel="stylesheet" href="/css/collection.css">
+    <link rel="stylesheet" href="/css/excursion.css">
+    <link rel="stylesheet" href="/css/news.css">
+    <link rel="stylesheet" href="/css/contacts.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/modal.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <button class="btn-reset header__burger">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
+            <a href="#" class="header__logo-link">
+                <img class="header__logo" src="/img/logo.png" alt="Лого">
+            </a>
+            <nav class="header__nav">
+                <ul class="header__list list-reset">
+                    <li class="header__item">
+                        <a href="#halls" class="header__link">
+                            Залы музея
+                        </a>
+                    </li>
+                    <li class="header__item">
+                        <a href="#history" class="header__link">
+                            История
+                        </a>
+                    </li>
+                    <li class="header__item">
+                        <a href="#catalog" class="header__link">
+                            Экспонаты
+                        </a>
+                    </li>
+                    <li class="header__item">
+                        <a href="#excursions" class="header__link">
+                            Экскурсии
+                        </a>
+                    </li>
+                    <li class="header__item">
+                        <a href="#news" class="header__link">
+                            События и новости
+                        </a>
+                    </li>
+                    <li class="header__item">
+                        <a href="#contacts" class="header__link">
+                            Контакты
+                        </a>
+                    </li>
+                    <li class="header__item">
+                        <a href="http://gukovo-school23.ucoz.ru/" class="header__link">
+                            Сайт нашей школы
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="hero">
+            <div class="hero__con">
+                <div class="container">
+                    <div class="swiper hero__swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide hero-slide slide-2" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hero-slide slide-1" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hero-slide slide-3" data-swiper-parallax-opacity="0.5"></div>
+                        </div>
+                    </div>
+                    <h2 class="hero__title">
+                        Добро пожаловать на сайт нашего музея!
+                    </h2>
+                    <p class="hero__descr">
+                        Музеи – словно кладовые нашей общей памяти о прошлом, которое, вроде бы, уже ушло, но ведь оно
+                        было. Героическое и смешное, горькое и кровавое, наполненное именами и судьбами предков.
+                    </p>
+                    <a href="#" class="hero__link">
+                        Узнать об истории музея
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="halls" id="halls">
+            <div class="container">
+                <ul class="halls__list list-reset flex">
+                    <li class="halls__item">
+                        <div class="hall">
+                            <div class="hall__img hall__img-1"></div>
+                            <div class="hall__info">
+                                <h2 class="hall__title">
+                                    Зал “История города”
+                                </h2>
+                                <p class="hall__descr">
+                                    Фотографии, подлинные документы и их копии, книги дополняют рассказы экскурсоводов о
+                                    природно-климатических особенностях региона, его богатых фауне и флоре, славных и
+                                    трагических страницах истории Гуково, его людях - замечательных тружениках,
+                                    доблестных воинах.
+                                </p>
+                                <button class="hall__more btn-reset" data-path="modal-first">Подробнее</button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="halls__item">
+                        <div class="hall">
+                            <div class="hall__img hall__img-2"></div>
+                            <div class="hall__info">
+                                <h2 class="hall__title">
+                                    “Комната боевой славы”
+                                </h2>
+                                <p class="hall__descr">
+                                    Военные трофеи, письма-треугольники с фронта, медали, ордена защитников страны, в
+                                    этой комнате хранятся фотографии, воспоминания участников военных действий в
+                                    Афганистане, в Чечне, и многое другое!
+                                </p>
+                                <button class="hall__more btn-reset" data-path="modal-first">Подробнее</button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="halls__item">
+                        <div class="hall">
+                            <div class="hall__img hall__img-3"></div>
+                            <div class="hall__info">
+                                <h2 class="hall__title">
+                                    Зал “История школы”
+                                </h2>
+                                <p class="hall__descr">
+                                    В этом зале рассказывается о том, как открывалась наша школа, о первом директоре –
+                                    Шеболдаеве Владимире Александровиче, имя которого носит сейчас наша школа, об
+                                    учителях нашей школы и, конечно же, о ее выпускниках. Все это отражено на стендах, в
+                                    альбомах, фотографиях.
+                                </p>
+                                <button class="hall__more btn-reset" data-path="modal-first">Подробнее</button>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <section class="history" id="history">
+            <div class="container">
+                <div class="history__info">
+                    <h2 class="history__title">
+                        История музея
+                    </h2>
+                    <div class="history__descr">
+                        <p class="history__descr-1">
+                            В 1967 году по инициативе Любови Федоровны Шеболдаевой в школе был создан краеведческий
+                            музей.
+                            Она же была бессменным руководителем музея на протяжении многих лет. В 1976 году музею был
+                            присвоен статус «Школьный музей».
+                        </p>
+                        <p class="history__descr-2">
+                            О нашем музее знают не только в нашем городе, но и в нашей области. Среди школьных музеев
+                            наш
+                            музей неоднократно занимал призовые места и был отмечен грамотами и дипломами.
+                        </p>
+                        <p class="history__descr-3">
+                            Одна из традиций нашего музея – это проведение вахты памяти В.А. Шеболдаеву, первому
+                            директору,
+                            чье имя носит наша школа. Она проводится ежегодно со 2 по 17 февраля. В это время
+                            экскурсоводы
+                            проводят экскурсии, учащимися готовятся презентации, оформляются стенды, посвященные истории
+                            школы.
+                        </p>
+                    </div>
+                </div>
+                <div class="history__img">
+                    <div class="swiper history__swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide hslide-1" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hslide-2" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hslide-3" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hslide-4" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hslide-5" data-swiper-parallax-opacity="0.5"></div>
+                            <div class="swiper-slide hslide-6" data-swiper-parallax-opacity="0.5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="catalog" id="catalog">
+            <div class="container">
+                <h2 class="catalog__title">
+                    Экспонаты
+                </h2>
+                <p class="catalog__descr">
+                    В нашем музее около 200 экспонатов. Экспонаты для музея собирали и приносили, дарили музею учителя,
+                    учащиеся, родители, жители микрорайона. Это - личные вещи участников Великой Отечественной войны,
+                    документы, письма с фронта, фотографии, предметы домашнего обихода, монеты, гильзы, снаряды, каски,
+                    газеты, старинные книги и многое другое. Есть ценные подлинные вещи и документы, переданные на
+                    хранение лично их владельцами. Более 60 процентов экспонатов представляют особую ценность и входят в
+                    основной фонд музея.
+                </p>
+                <div class="catalog__tabs flex">
+                    <div class="tabs-contents">
+                        <div class="tab tab-active flex" data-painterstarget="domenico">
+                            <img src="/img/collection/collection__mosinka.jpg" alt="Винтовка Мосина" class="tab-img">
+                            <h4 class="tab-title">
+                                Винтовка Мосина
+                            </h4>
+                            <p class="tab-descr">Винтовка Мосина — российская винтовка со скользящим затвором, созданная
+                                в 1891 году.
+
+                                Является одной из самых распространенных видов стрелкового оружия, с которым воевали
+                                солдаты, принимавшие участие в войнах первой половины XX века. Один из видов стрелкового
+                                оружия, простоявшего на вооружении армии/армий несколько десятков лет.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="bergonyo">
+                            <img src="/img//collection/collection__cazal.jpg" alt="Доменико" class="tab-img big-img">
+                            <h4 class="tab-title">
+                                Гуковское казачество
+                            </h4>
+                            <p class="tab-descr">Жизни донского казачества в XVIII – начале XX веков посвящена отдельная
+                                экспозиция нашего музея. Одно из центральных мест здесь занимает витрина с оружием и
+                                наградным знаменем донских казаков. Эта часть зала знакомит посетителей с общественным
+                                устройством
+                                донских казаков – экспонируются воссозданные костюм атамана, символы атаманской власти,
+                                печати Войска Донского.
+                            </p>
+                        </div>
+                        <!-- <div class="tab flex" data-painterstarget="boltrafio">
+                            <img src="/img/global/catalog/catalog_boltrafio.jpg" alt="Доменико" class="tab-img big-img">
+                            <h4 class="tab-title">
+                                Больтраффио, Джованни
+                            </h4>
+                            <span class="tab-date">1466 - 1516 гг.</span>
+                            <p class="tab-descr">Итальянский художник Высокого Возрождения. Вазари сообщает, что
+                                художник происходил из аристократической семьи. Воспитанный в традициях Фоппы, Бернардо
+                                Дзенале и Амброджо Бергоньоне, он прошёл обучение в мастерской Леонардо. Его первое
+                                произведение «Воскресение Христа, святой Леонард и святая Лючия» выполнено в 1491 году
+                                совместно с Марко д'Оджоно для миланской церкви Сан-Джованни-сул-Муро. Был придворным
+                                художником Лодовико Моро и славился своими психологическими портретами. Больтраффио умер
+                                в возрасте 49 лет и был похоронен на кладбище церкви Св. Паулы в Комито. Историки
+                                искусства предполагают, что фигура Младенца на картине Леонардо да Винчи «Мадонна Литта»
+                                принадлежит кисти Джованни Антонио Больтраффио. Известны подготовительные рисунки
+                                Больтраффио, в точности воспроизводящие эту фигуру.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="Botticini">
+                            <img src="/img/global/catalog/catalog_Botticini.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Боттичини, Рафаэлло
+                            </h4>
+                            <span class="tab-date">1477 – 1520 гг.</span>
+                            <p class="tab-descr">По мнению исследователей его творчества, это был художник скромного
+                                дарования, никогда не стремившийся завоевать высоких позиций в интеллектуальном и
+                                финансовом центре Тосканы — Флоренции, и довольствовавшийся заказами, которые ему давали
+                                провинциальные храмы. Его искусство было эклектичным, и наряду с влиянием отца включало
+                                связь с искусством Перуджино, Ридольфо Гирландайо, Лоренцо ди Креди, Фра Бартоломео и
+                                др. Рафаэлло Боттичини был почти забыт художественной критикой; главную роль в его
+                                «возрождении» принадлежит итальянскому искусствоведу Федерико Дзери, опубликовавшему в
+                                1968 году работу о художнике; в ней Дзери смог восстановить хронологию его творчества и
+                                более точно атрибутировать некоторые произведения.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="Brea">
+                            <img src="/img/global/catalog/catalog_Brea.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Бреа, Людовико
+                            </h4>
+                            <span class="tab-date">1450 – 1523 гг.</span>
+                            <p class="tab-descr">Ренессансный художник французского происхождения, работы которого в
+                                основном сосредоточены в прибрежных городах современных Лигурии (Италия) и восточной
+                                части Приморских Альп (Франция).Бреа родился в происходившей из Монтальто-Лигуре семье
+                                бондарей в Ницце, являвшейся в то время частью Генуэзской республики. Бреа был в
+                                основном клерикальным художником, и наиболее значительные его работы представляют собой
+                                алтарные картины. Первая значимая работа художника представляет собой роспись
+                                францисканского монастыря в Симье (современная Ницца). Прочие работы художника
+                                сосредоточены прибрежных поселениях между Монако и Ментоной, между Таджей и Империей и
+                                между Савоной и Генуей. Одним из учеников Людовико Бреа был Террамо Пьяджо.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="Vecchietta">
+                            <img src="/img/global/catalog/catalog_Vecchietta.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Веккьетта
+                            </h4>
+                            <p class="tab-descr">О Веккьетте сообщает в своих «Жизнеописаниях» Джорджо Вазари и
+                                описывает его как человека мрачного и нелюдимого, вечно погружённого в раздумья, и
+                                потому прожившего недолго. Позднейшие исследователи пытались имя этого художника увязать
+                                с какими-либо архивными данными. Сейчас общепризнанной считается версия, что описанный
+                                Вазари Веккьетта — это Лоренцо ди Пьетро ди Джованни, который был крещён в Сиене в 1410
+                                году. Имя этого человека появляется в документах в 1428 году среди членов гильдии
+                                художников Сиены. Многие исследователи считают, что его учителем был Сассетта. Не
+                                вызывает сомнений и то, что на него ещё в начале карьеры произвело сильное впечатление
+                                творчество Донателло, который был в Сиене в 1427 году. </p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="Granacci">
+                            <img src="/img/global/catalog/catalog_Granacci.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Граначчи, Франческо
+                            </h4>
+                            <span class="tab-date">23 июля 1469 - 30 ноября 1543</span>
+                            <p class="tab-descr">Франческо Граначчи учился в мастерской Доменико Гирландайо, где также
+                                начинал работать молодой Микеланджело, который стал его другом и с которым он поступил в
+                                школу Лоренцо Великолепного в саду Сан-Марко.По заказу Лоренцо Медичи Великолепного
+                                Граначчи участвовал в росписи церкви Сан-Марко во Флоренции. Позднее работал с Леонардо
+                                да Винчи, Микеланджело и Рафаэлем. В 1508 году Граначчи отправился в Рим, где вместе с
+                                другими художниками помогал Микеланджело переносить кальки (подготовительные рисунки)
+                                для poсписи на потолок Сикстинской капеллы в Ватикане. Вернувшись во Флоренцию, он
+                                написал образ Мадонны с Младенцем между святыми Франциском и Иеронимом для монастыря
+                                августинцев Сан-Галло (San Gallo; ныне в Галерее Академии), Мадонну делла Чинтола для
+                                конвенто Сан-Бенедетто. В 1515 году он участвовал в оформлении апартаментов для визита
+                                папы Льва X во Флоренцию. Скончался художник во Флоренции, похоронен в церкви
+                                Сант-Амброджо во Флоренции.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="udine">
+                            <img src="/img/global/catalog/catalog_udine.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Джованни да Удине
+                            </h4>
+                            <span class="tab-date">15 октября 1487 - 1564</span>
+                            <p class="tab-descr">Джованни учился сначала у Джованни Мартино (итал. Pellegrino da San
+                                Daniele) в Удине, затем переехал в Венецию, где стал учеником Джорджоне. В 1514 году
+                                переехал в Рим, где поступил в мастерскую Рафаэля и считался одним из наиболее
+                                талантливых его учеников. Джорджо Вазари отмечал его стремление к гротеску и большую
+                                любовь к изображению природы и натюрморта: растений, животных и неодушевлённых
+                                предметов. После смерти Рафаэля художник работал по заказам кардинала Джулио Медичи
+                                (будущего папу Климента VII) по украшению росписями Виллы Мадама вместе с другими
+                                учениками Рафаэля, завершив работы к 1525 году. По рассказам Дж. Вазари конфликтовал с
+                                Джулио Романо.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="djordjone">
+                            <img src="/img/global/catalog/catalog_djordjone.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Джорджоне
+                            </h4>
+                            <span class="tab-date">1477 - 17 сентября 1510</span>
+                            <p class="tab-descr">Джорджоне «был человеком с выдающимся романтическим обаянием, великим
+                                любовником и музыкантом, стремящимся выразить в своём искусстве чувственную и образную
+                                грацию, тронутую поэтической меланхолией, типичной для венецианского существования его
+                                времени». Джорджоне родился в небольшом городке Кастельфранко-Венето недалеко от
+                                Венеции. В 1493 году переехал в Венецию и поступил учеником в мастерскую Джованни
+                                Беллини. Ироничное прозвание «Джорджоне» («Большой Джорджио», с увеличительным суффиксом
+                                «one»), вероятно, связано с его хрупким телосложением и небольшим ростом. В
+                                «Жизнеописаниях» Джорджо Вазари сказано несколько иначе: «За внешний свой облик и за
+                                величие духа».</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="Pessellino">
+                            <img src="/img/global/catalog/catalog_Pesellino.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Пезеллино
+                            </h4>
+                            <span class="tab-date">1422 - 1457</span>
+                            <p class="tab-descr">В своём многотомном труде Вазари сообщает, что Пезеллино принадлежит
+                                множество картин небольшого формата, в частности, росписей свадебных сундуков-кассоне, а
+                                также изображений «Мадонны с младенцем», в которых он использовал приёмы Фра Филиппо
+                                Липпи, и добавляет: «в домах горожан есть много тондо и картин его работы» (правда,
+                                ошибочно приписывая эти работы его деду Пезелло). Таким образом, большинство работ
+                                Пезеллино — это не громоздкие церковные алтари, а небольшого формата произведения для
+                                домашнего употребления.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="peruzzi">
+                            <img src="/img/global/catalog/catalog_peruzzi.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Перуцци, Бальдассаре
+                            </h4>
+                            <span class="tab-date">7 марта 1481 - 6 января 1537</span>
+                            <p class="tab-descr">Перуцци увлекался античной археологией, математикой, астрономией,
+                                геометрией и перспективой. Он был подлинным человеком возрождения, но в своём
+                                индивидуальном стиле причудливо соединял нормы римского классицизма, созданные Браманте
+                                и Рафаэлем, с элементами маньеризма, нарождающегося барокко и родными ему готическими
+                                архаизмами сиенской школы живописи. В этом он типичный маньерист. В его архитектурных
+                                работах маньеризм проявился, по тонкому наблюдению Б. Р. Виппера, в необычно изогнутом
+                                фасаде, аритмично расставленных колоннах и пропорциях оконных проёмов Палаццо
+                                Массимо-алле-Колонне. В его живописных работах привлекает необычная экспрессия, типично
+                                маньеристичная изощрённость заполнения фигурами всего изобразительного пространства.</p>
+                        </div>
+                        <div class="tab flex" data-painterstarget="pinturikio">
+                            <img src="/img/global/catalog/catalog_pinturikio.jpg" alt="Доменико" class="tab-img">
+                            <h4 class="tab-title">
+                                Пинтуриккьо
+                            </h4>
+                            <span class="tab-date">1452 - 11 декабря 1513</span>
+                            <p class="tab-descr">Представитель умбрийской школы кватроченто. Учился у Фьоренцо ди
+                                Лоренцо, вместе с Рафаэлем — у Перуджино, которому помогал при создании фресок
+                                Сикстинской капеллы Ватикана (1481—1482), а по некоторым данным — ещё и у Бенедетто
+                                Капорали, создателя дворца кардинала Пассерини, впоследствии расписанного Синьорелли.
+                                Вероятно, испытал влияние и Бенедетто Бонфильи, учителя Перуджино. Став зрелым мастером,
+                                Пинтуриккьо отказался от некоторых принципов Перуджино — однообразности и степенности
+                                фигур, единства времени и места, — что сближает его скорее с Боттичелли.</p>
+                        </div> -->
+
+
+                        <!-- Заглушка -->
+                        <div class="tab flex" data-painterstarget="zag">
+                            <img src="/img/collection/collection__zag.png" alt="Мы об этом ничего не знаем... :("
+                                class="tab-img">
+                            <h4 class="tab-title">
+                                Что мы о нём знаем?
+                            </h4>
+                            <p class="tab-descr tab-zag-descr">Пока ничего… Зато мы точно знаем, что в событиях есть
+                                что-то интресное!</p>
+                            <a href="#gallary" class="error-link">В события</a>
+                        </div>
+                    </div>
+                    <div class="tabs-accordion">
+                        <ul class="accordion-list list-reset">
+                            <li class="accordion-item">
+                                <div class="accordion-top flex ">
+                                    <h3 class="accordion-title">Зал город Гуково</h3>
+                                    <button class="accordion-btn btn-reset" tabindex="-1"><svg class="accordion-btn-svg"
+                                            width="18" height="11" viewBox="0 0 18 11" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M17.3333 1.33334L9 9.66667L0.666664 1.33334" stroke="black" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="accordion-bottom accordion-with-info">
+                                    <button class="accordion-link accordion-link-active btn-reset js-scroll-link"
+                                        data-painterspath="domenico">Винтовка Мосина</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="bergonyo">Гуковское Казачество</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Дореволюционная книга </button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Дореволюционный утюг </button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Картина “г. Гуково</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Кирка</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Книга “Гуково”</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Минералы г. Гуково</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Портрет Шеболдаевой Л. Ф.</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Профессии города</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Прялка XIX века</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Ружьё</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Символы РФ</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Советская пилотка </button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Советские рубли</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Стенд “Гордость города”</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Стенд “Гуково в СССР”</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Стенд "История музея"</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Тарелка времён СССР</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Уголь “500000т"</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Чугунный чан</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Шахтёрские инструменты</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Шахтёрский фонарь</button>
+                                    <button class="accordion-link btn-reset js-scroll-link"
+                                        data-painterspath="zag">Шашка Казака</button>
+                                </div>
+                            </li>
+                            <li class="accordion-item">
+                                <div class="accordion-top flex">
+                                    <h3 class="accordion-title">Зал боевой славы</h3>
+                                    <button class="accordion-btn btn-reset" tabindex="-1"><svg class="accordion-btn-svg"
+                                            width="18" height="11" viewBox="0 0 18 11" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M17.3333 1.33334L9 9.66667L0.666664 1.33334" stroke="black" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="accordion-bottom">
+                                    <div class="accordion-error flex">
+                                        <div class="error-img">
+                                            <div class="error-img-rect"></div>
+                                        </div>
+                                        <div class="error-info">
+                                            <h3 class="error-title">
+                                                Здесь пока пусто
+                                            </h3>
+                                            <p class="error-descr">
+                                                А в новостях вы всегда можете найти что-то интересное!
+                                            </p>
+                                            <a href="#gallary" class="error-link">
+                                                Новости музея
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="accordion-item">
+                                <div class="accordion-top flex">
+                                    <h3 class="accordion-title">Зал “История Школы”</h3>
+                                    <button class="accordion-btn btn-reset" tabindex="-1"><svg class="accordion-btn-svg"
+                                            width="18" height="11" viewBox="0 0 18 11" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M17.3333 1.33334L9 9.66667L0.666664 1.33334" stroke="black" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="accordion-bottom">
+                                    <div class="accordion-error flex">
+                                        <div class="error-img">
+                                            <div class="error-img-rect"></div>
+                                        </div>
+                                        <div class="error-info">
+                                            <h3 class="error-title">
+                                                Здесь пока пусто
+                                            </h3>
+                                            <p class="error-descr">
+                                                А в новостях вы всегда можете найти что-то интересное!
+                                            </p>
+                                            <a href="#gallary" class="error-link">
+                                                Новости музея
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="excursions" id="excursions">
+            <div class="container">
+                <h2 class="excursions__title">
+                    Экскурсии
+                </h2>
+                <div class="excursions__con">
+                    <div class="swiper excur__swiper">
+                        <div class="swiper-wrapper">
+                            <div class="exursion swiper-slide flex">
+                                <div class="excursion__info">
+                                    <div class="excursion__text">
+                                        <h3 class="excursion__title">
+                                            Тематическая экскурсия в рамках Месячника Героико-патриотического Воспитания
+                                        </h3>
+                                        <p class="excursion__descr">Сегодня для 9 «Б» класса стал очень интересным и
+                                            запомнившимся. Они посетили школьный краеведческий музей, где узнали о
+                                            биографии первого директора нашей школы В.А. Шеболдаева. Рассмотрели
+                                            экспонаты зала, посвященного ВОВ. А в завершении экскурсии они с
+                                            удовольствием отвечали на вопросы компетентого и грамотного экскурсовода
+                                            Чуприковой А. Д. - учителя истории и обществознания в нашей школе.</p>
+                                    </div>
+                                    <div class="excursion__date">16 февраля 2023 г.</div>
+                                </div>
+                                <div class="excursion__img"
+                                    style="background-image: url(https://lh3.googleusercontent.com/fife/AMPSemfkU28OVA3PM-Cg6VOS3mLriCneFy5Sv2RZ1uqF0cLRvO01S_sReOZ-21zti0CWm0vVIggPMeObF4jSlpEqXgLDtnSfJ_n22Rm8gB6HkofhPtrVUI4YJSUXv34rQHvI4Fj_nIVBM8E_z45Tol_zviNa1Pw7s-6wUs5Y1Idy3CtW6vlDbtmmdyubcPr7T75Jf2XjOBuop5XB3x2JEwClHPV86apBQtVXZRa9AShtqhli8cTVwFGeR-d9X0CHsgi6WAZQ2z14bK8iC705kp-LMNEjwvu69avcOrzc13XUZDbvYzSb5rA3A7v1wDdt1T8ufX5oUhM6_RBde9hFJctQWRmymMT52tDqYzRaoh-k3vnzjF2wGrkGzZMWVIG02_TztRAn_9CqlrDeClfFPQtEqBA22CGXtKH1SLPyA-0HiIYfN1wi75Ui6QxkDxYVk4E0bj4iBJnhLQjtg0oqV4ZRqpVeYwhxdOBUtvs6MLYepIForhCsmB4YgtfmQK-QRPgcdGSwY7GpevaLS2k8J1xhKNwRzeBQDlE2A6OFr2nqlKhokdwxqAN2vFP0QZF9YA279rOO6rvy80oMfSA47vvnpd2I41MCaPMO33heQEtSeGphCeDGLTHZBuTgTuVu-tIo-SsTBCTJVeI5rjYwKburUWyy9Mo4HnAqisJn8UULYF9DEsnwaumE0sojQW4NVNsFUaYBqGNxYIEstN-GIQ--8xhgXR479yRDaqRgEE0dPliZnMKwQ2ZxZ14koEiAlV905KZ4kHAz1y3n6gsUfY2HWJ2TFnGZ_y-OmYr1yGrpoavbxg0bV8TnBSpxLyGXnOMFoipm5GREQeWNyyauVTxCyj2jDRmuy51MS4fIHwl1YcqDpuxzqTb7vlJg-iJjWrkQBOevGUAQdsBbqTMPVN6h2qC1yC96iyfHuuVdcveMlMroFSoLhWmuMXo3lR582MmxbI-sVizXFLuZ60WiO4mB1tCZtPubGWwfEGujWMYwXZfYEMSC9DRYY8ZATrs1OUMxi9GLIPIam7Cs9iyyAXx78Wh6YCa75aXHXvzevamSSyqFm_kRaisTZBXFSNtAScWx_aDUTD3PZ7qBt3YP_q-MNCeHUt3K33XaQqcb0j6fNujqMZe_XMNR0i7phqdQfbmzourlhflhLiR9b34TpFRyB_-fQlq4jYUSroHgGzo0pDRZeJl6N56QrpF1dbJgrRQbgJMqwv4zzhVk9LpdQiwQ4pjDpsTsNkuM6GfUFZQvSRe6yzNwmX8Ku3t2NuZYKMtVN6rGeiZovKZ1WZcZW9-_KCAZoAnpFCZ8haD-X6qytgdXi3kN4F5ZcvIE3zBzd8Id3M73a_B_Qqg4d89b1CXvKH42DVnZNdC2z7sf1sFV6Kr2135lUaCOFmnSLltTdm0ovxx0JTS0-Bz8rPSNWID89LYmdSSdT6nEApcYuDUDVJBYTDHjUtDB_mSbhjnI66mxH7urFbKHWpp7vLwkd9YFWA=w3648-h1202);">
+                                </div>
+                            </div>
+                            <div class="exursion swiper-slide flex">
+                                <div class="excursion__info">
+                                    <div class="excursion__text">
+                                        <h3 class="excursion__title">
+                                            Его именем названа школа
+                                        </h3>
+                                        <p class="excursion__descr">Сегодня двери школьного краеведческого музея
+                                            открылись для учащихся 9-х классов, которые с удовольствием и интересом
+                                            посетили выставку, посвященную памяти Владимира Александровича Шеболдаева.
+                                            Из
+                                            воспоминаний учителей: «Те учителя 23-й, кому довелось работать с Владимиром
+                                            Александровичем, по-прежнему с уважением и теплотой говорят о нем: «Наш
+                                            директор». Высшей
+                                            наградой для Владимира Александровича были слова, которые он слышал на
+                                            выпускном вечере от учеников: «Знаем, как директор по ночам не спал, как за
+                                            школу нашу он переживал. Видно, потому не можем мы уйти, что ему не
+                                            поклониться до земли». </p>
+                                    </div>
+                                    <div class="excursion__date">02 февраля 2023 г.</div>
+                                </div>
+                                <div style="background-image: url(https://lh3.googleusercontent.com/fife/AMPSemeV5YDmbAGoHRbfQFrtcTDolIzBdkDiY6jRHdPvHnBzy3TwvNQkj0A1iGhIeph-4MMCfdTJHHpnKJCVHqfDeqFjLvWM5hz9qSA65Jbn0Q8HfwVKplT9MYolsz8BcHO0IvCzEsLnJ90QP9opvJe1EZ4Bq4USRqHT5T0GGxIQYlVIYcQi5mlj2dqKpU0cipuYwEOCvTYYqq2LtBFLejUiE9AjzpoSPwXg_y25xmOb7QtWPwtn3Mw_jnTn8rEYi5FLlq7fR9X7L0BBEhoPJrQzvKQpdZ1Qag5KaPOLToug7E8drENEFtUXCn-Pa7WQyGivAcNb0Sm307oSmvr7hAdNp0_L86dJMw3kPZNT-9abVJS4EkcG_vlZJI5zs1f6AbXtQy55GJwdm18cpnwixfSAiFys8a8vWbWsZW_GLTi9_lnpXERZmH8Evij53GS1iEylUbWT-sQ1ojAy2MqmccCWaIOYP-2cTSOQiMPnLTz-fCKL8l-ZHDyyiE_z754Tz09L0uY7rXM9BBDvo8m4jB3vx2DlvoCXqrRNzIhZ_ni22dAwR4JJLlUqb-7qpghGJwVH-nDbhItwJZUoKLly73X4rFvsiAYKsrmc8XqD5hmGbe_uOTQGaZUTia3nPLu0iiONjQY9L_MMTV_h2MfmEBSqVmTj80O4DEQ3yprJB9-zQYya73DjC1Xohn9NOtcKuvp2kuJdziGU3PYG_nuSpnzuTvP483NluL5OHgIs2zSrAlBawcXXVx4zUfLUMCPvgsRDYw4gwSAx5TlkJoL6unZQcOM4vUA5dU-16r10M6B-mgMecqx4FzoMKuyEaOfDeMKRQVlmxVwTuiwij_I-sK_JxIk0tXGHc-cBv4wmR0jD4hwe9n-DQQxxERxVZNJXRbP995TaraxFatHgS97T62V9vh4On4bbiKBZWocj5JKvqpxY_wrlHp8ss8g-dDGw3egsEmJ5dlOyzIA2AkXtQ_eD5WopoIblZhMXp4l3nIEinLvqT5UzaonEKhDiWNCsbK9wIZyXeCGY46CLTvML3SPTC1no6h7kZvhlLuXlaDkxDZmLuTWcT4-yd_jph_KtF-lqFgx9KDWBQnvQYvnqgsQFJI-QPxAH47Vosi5loioyupv1bCytaEYlVn4Fp4WVopsGckYkP8br3jHnfnOXuxhpG3LKysBo3jfrK_uNHKPOUtzKLbgqgH5MImbOcCjpUKtlLjlHmslwqCPMnnxaayVjEncXzaL5S34JNGRWudstC8wVrFESEZOClp3yuDS6PK12HvqcYIQHvoGPiu1v63um2_a8QUDj351E2WxzUg7gHRDZ6wlQhdQRVgG9PD_VBlFlZPWOdMB9rbRLACANCck2wq6GPLduRw_wkSht5g1KlxIc7BDlVzPzHfbh8K9dNXrv_bPPw5WdTdYSGCmgJFfZ078fRQZjx_VjNPcU7Wrkov11pcj79Z9upygPCCX20LK95Op4JXMf2VT_krqigUiefQ=w1920-h904);"
+                                    class="excursion__img"></div>
+                            </div>
+                            <div class="exursion swiper-slide flex">
+                                <div class="excursion__info">
+                                    <div class="excursion__text">
+                                        <h3 class="excursion__title">
+                                            Блокада Ленинграда
+                                        </h3>
+                                        <p class="excursion__descr">Спустя 80 лет после прорыва блокады Ленинграда,
+                                            ученики 11 класса пришли почтить дань памяти Жителям осаждённого города в
+                                            нашем музее. Ребята узнали много нового об истории города, начале его осады,
+                                            о Дороге Жизни, о прорыве блокады. Также они прочли письма блокадников и
+                                            пообщались с жительницой Ленинграда тех времён. </p>
+                                    </div>
+                                    <div class="excursion__date">17 января 2023 г.</div>
+                                </div>
+                                <div class="excursion__img"
+                                    style="background-image: url(https://lh3.googleusercontent.com/fife/AMPSemdGrhZIWorcYNIU_5Z_P8nU3RB6yb77LB9g-joBjCDXz8za02woD0rTkOV1EpsPylaWFUB-fC7dH2mNRGwm6PhAmjnv-XBHI0PukRoV9MwkNrTSpEJfyuUUmG0zjP69Csv4sxP6krWqtMegHauBhfKBpRdrblIF5nH8CeN931Sh4a1_tueaYPM1TTto0Z1AiM63dtHpDABr-fSkgqYU_lY15iA5lSExrMhp8faNeSqrVUUySoNzEnkbB4k9hQ5AhM9qO04ZbhXj8efOdN2ZHYGDUn6Tn0H0Py9gdjUQ1bjPW3-oR8dZvhhuhcBhK3BRx_I0KUNFgwtBluSzp5FDZbqyaxM4FIyZTV8098_UsNhjLPL4L4y8xkqmodM4QErDj4XbK0xZeVtnRClaQBiYwf8c5OnlCglFkZlT3p4uSVUI-EfbHJRAdDDtj6-DEawEyhC2bDJRxFtULxY92-R7Ln4nsn7qSQUyJcZnLMA5wo-BHiFOknthAUw09bzfkfilwF9j9EZayEXNYZL0XwCFP79Gf82i2T4BoTxHkDWmHzXcSBXOJwAL1aQI3i8cmAyoj22f8PdfSb1kDAiLwfHYzVYDedEqe2dyeVVZQFiT9uw91ljtb-uGdGw9p3rq-WyyKWka6rQFvTCRjSmHipV4ScZoXtRXzPak1P8QF9N8yRwnhxI9ZSFdkpelvOyBWJGcMa_pfl6nh4yMdHxCYw1cG4gywR67sb7WN32GgsgiQLXLcCV4Efqel9ff7NxXtWGhO8m1-s3Es14IsMMN5j2hII4TA4J55mJHkWmrlWqF4ed6frTa4Oz-i22QQlfEpQveSPkjStV40rDvP8SXIa9VoFR_IcYPHBdDIU6t4pXtXqAsuOpGW9O48VDjDoEbqnJS4xDejgb6TeSsrX5CuoHpDY91rjJEhUumc9oRXFbQ4-IYO4NIezpZwONNpRn_hOZB3JXTdw3_zAJjPImxcjuiBQz7tvVF9yhkVhl9MEgh7iafEqg7GS7zmpBd2aUgU8o4Y5sfRWuQy8lvQ6KxGz7PQ0PpckfWyr9qk-dfdXvzTpiilmKlwPJbJUzJqgTNDmtjt2y53HOag-PJ6z4WRFhVK18fkHlgA-4CZuyLQ_5VzejSy9j5wid52WI26hfmzyBMUcKodfxafgRjPQ0eOE_0zJv9hj2YfUMNmSMBGYtV76frY7iPRSXP8qDEKJqWLLAMWlL-xGwDwMQ86ccYiOgui5QyJJlSS3LZiSB42kenvNoqaqz3AeHi-1rYh7NNpAByqDoobMuGxpglaQG_-FFnf3h8lzc4z5-sjKGuzVrNnAQWmZbrRo3NPrAiUmOkIgLAFPi2RMMNBYsWCHISFJ3rJPWsLAqhYyM5meUXN32sxzf242kpJvaV9I5dHnxwZNTRb7_ekRCWRhrR8gkiby7-7zQy-jJMpV1bW5fk4gecPfMjy3dmUiiCjOpC5q70rtQXNSLMWS0UKjPOj8YpqT6iLw=w1920-h904);">
+                                </div>
+                            </div>
+                            <div class="exursion swiper-slide flex">
+                                <div class="excursion__info">
+                                    <div class="excursion__text">
+                                        <h3 class="excursion__title">
+                                            В предверии Нового года ученики 8г класса посетили наш музей
+                                        </h3>
+                                        <p class="excursion__descr">Сегодняшний день для 8 «Г» класса стал очень
+                                            интересным
+                                            и запомнившимся. Они посетили школьный краеведческий музей, где узнали о
+                                            биографии первого директора нашей школы В.А. Шеболдаева. Рассмотрели
+                                            экспонаты
+                                            зала, посвященного ВОВ. А в завершении экскурсии они с удовольствием
+                                            отвечали на
+                                            вопросы компетентого и грамотного экскурсовода Чуприковой А. Д. - учителя
+                                            истории и обществознания в нашей школе.</p>
+                                    </div>
+                                    <div class="excursion__date">23 декабря 2022 г.</div>
+                                </div>
+                                <div style="background-image: url(https://lh3.googleusercontent.com/fife/AMPSemdbo5i9HyX_Qpipz85ENYt-XIyn7nuG3xSnxLFafDk_u6ZfH8CT1s2wnEjKqy5jMVDOoKRnZYvq4JiUvYavRk9v5W63lRaldeAmrH4Bf82KbmPjjbpyC933tdBA9l-TXIBsoP92-cVJvtJp0JCyNjZJ8WH_TFB1-hFslsF-_lmu-6dGhZn4AAH_o1lOGatBPVtNQPe4RRb1etHtfRDsBk-ZPo4WyOafDVAdjGPzHHQKwztRX7oUglpeUZS9CFU4u7h7BFyrrFc3sCvkysQ1EdrrsEwj5z5XoIiyAm6DckgP5B8WSkVtv0kFe1D_msr2Ci95OszYC3EHDSmr1DtzMUsWsK4KIIsruAIm12R1petgqKkW0JcnheyMYEV7caiels01wYWK0dPFsoFeBzIxfcE4EDn88PcN-t07n78cZjZCbJvGdXyMXVXOg0GBV2Hj8sGQBbz1kdPAVaLzUl74He4aPJxhfCXRtVV1LX350e6mYt_AHIeddp50B0d8GpmwewY2ap-Inu4QHKf0SH4SED5lUducaTUXurcOL8M6nqwc-cywIkYn6J5VBN7oH78eyXn-IXrwIG120dTlneIIjU1pbs13NhSuR3To1iMU1Zc64ZfoXgqjf5hcDEZaSugJ0Zp4HBAr4LqS6UqHBhYS8rtf86OSmcY5Az8yamx1emyoDMLaQTwMpXLIQpnRUm85rnuW1DPd_qCHDpHuvr9JmIIbO0wPma41MnkiW5idIGzD5AllV4VY_1KGFoJ7Hl1PaswwtYTGfDNj1ZD7BG86f9_LIlmfHnyEZRJDouIDo1DJHAE1WXZIE4TRVlThmWKcFj6VOv6oy7PTYNMK-chYuUUwxgEuR8DqYso06fjh00BUr81IA6okB9dOy-AUl-xAoptDfaO9bZQkQQfdao6qIU0orWPA0LmqG92Sy-Bg90bv2dOUrmq9vYZ53mo-uBMcqRbEMq8ZWhCQo-IESiowxW54VyiNSShWb_42jsSys2olmgThn--9AnE7jBK-h92Lh5269LR7p0SCRF1zSP38CSrOhHYvvqODyjbcoa9I3YEVrrMrLH0LhIzN9k29WiLWoJSpOtAOv6otUyumLXNk4e-ibXbKLwKTWnwyRrRcHK-WIvB-_hZ7Tr0nbpUY5RV_XYtaO5r23wfcDFK8NBc5sqvHt4zgvoF021w3hR-VW6h96sUj8hQ7f3YduK04ZLqDhs0LLQUVMR6Vdb1kgF6MRRxiWE-akRInbJyTlnEhGQEbTP9g0bWNQFert0uCXYpqyi-myo4YODkWuEHExlQl5_45DIxEQTkg4l1r1_wzdmR_DNzsd691QUvNn5tqXeQyfqAf6mqrXMJmRJ54Pf3gvE56RrIvhZd-8xkSm9u1RIbNX6t1iBsWMF3o8QQlFRt80jSjGlyAv1hP1tQzVxMfR77etbP2rrZqB34P9-XEKib7FfcvrADcLrYfc0sNEEvxUsPrgF0PUgRMbNf8X89oGA=w3758-h1236);"
+                                    class="excursion__img"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="swiper-button-next btn-reset">
+                        <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M25 2.72191e-06C38.8071 2.11838e-06 50 11.1929 50 25C50 38.8071 38.8071 50 25 50C11.1929 50 -4.89256e-07 38.8071 -1.09278e-06 25C-1.69631e-06 11.1929 11.1929 3.32544e-06 25 2.72191e-06Z"
+                                fill="#ECECEC" />
+                            <path
+                                d="M25 2.72191e-06C38.8071 2.11838e-06 50 11.1929 50 25C50 38.8071 38.8071 50 25 50C11.1929 50 -4.89256e-07 38.8071 -1.09278e-06 25C-1.69631e-06 11.1929 11.1929 3.32544e-06 25 2.72191e-06Z"
+                                stroke="black" />
+                            <path d="M23.3333 16.6667L31.6667 25L23.3333 33.3333" stroke="black" />
+                        </svg>
+                    </button>
+                    <div class="swiper-pagination excursion-pag"></div>
+                    <button class="swiper-button-prev btn-reset">
+                        <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M25 50C11.1929 50 1.31404e-05 38.8071 1.25369e-05 25C1.19333e-05 11.1929 11.1929 1.69631e-06 25 1.09278e-06C38.8071 4.89256e-07 50 11.1929 50 25C50 38.8071 38.8071 50 25 50Z"
+                                fill="#ECECEC" />
+                            <path
+                                d="M25 50C11.1929 50 1.31404e-05 38.8071 1.25369e-05 25C1.19333e-05 11.1929 11.1929 1.69631e-06 25 1.09278e-06C38.8071 4.89256e-07 50 11.1929 50 25C50 38.8071 38.8071 50 25 50Z"
+                                stroke="black" />
+                            <path d="M26.6667 33.3333L18.3333 25L26.6667 16.6667" stroke="black" />
+                        </svg></button>
+                </div>
+            </div>
+        </section>
+        <section class="news" id="news">
+            <div class="container">
+                <h2 class="news__title">
+                    События и новости
+                </h2>
+                <div class="news__block">
+                    <ul class="news__list list-reset">
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                Неделя Памяти Шеболдаева В.А.
+                            </h3>
+                            <span class="new__date">
+                                2 февраля 2023 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background: center url(http://gukovo-school23.ucoz.ru/News_error/2023/01/ehkskursija_u_stenda.jpg); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="http://gukovo-school23.ucoz.ru/News_error/2023/01/ehkskursija_u_stenda.jpg"
+                                        alt="" class="new__img leftimg">
+                                    Из воспоминаний учителей: «Те учителя 23-й, кому довелось работать с Владимиром
+                                    Александровичем, по-прежнему с уважением и теплотой говорят о нем: «Наш директор». А
+                                    как иначе? Ведь Владимир Александрович Шеболдаев считал школу родным домом, а
+                                    учителей и учеников – семьей. Как хороший хозяин все время благоустраивал свой дом,
+                                    так и он умело и любовно совершенствовал школу. 1 сентября каждый год учеников ждал
+                                    сюрприз – стрелковый тир, новая столовая, переход от школы к мастерским,
+                                    раздевалка-гардероб, фонтан.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                55 лет нашему музею!!!
+                            </h3>
+                            <span class="new__date">
+                                21 сентября 2022 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background: center url(/img/new/new-5.jpg); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="/img/new/new-5.jpg" alt="" class="new__img leftimg">
+                                    А.Д. Чуприкова, руководитель школьного музея, поздравила коллег с 55-летием
+                                    школьного музея, отметив, что несмотря на принятое в коллективе решение не проводить
+                                    в этот раз громких и пышных праздненств с приглашением гостей из-за серьезной
+                                    общественно-политической ситуации, немало важных мероприятий юные краеведы посвятили
+                                    юбиляру. Педсовет принял предложение Чуприковой А.Н. и ее воспитанников посвятить
+                                    очередной номер школьного журнала "Раздумья" школьному музею и опубликовать в нем не
+                                    только методические статьи педагогов, но и итоги разработки классных краеведческих
+                                    заданий и исследовательских проектов обучающихся.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                Последний день в школе
+                            </h3>
+                            <span class="new__date">
+                                25 мая 2022 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background: center url(/img/new/new-4.jpg); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="/img/new/new-4.jpg" alt="" class="new__img leftimg">
+                                    Сегодня после торжественной линейки и вручения аттестатов, ребята-выпускники 11
+                                    класса посетили наш пришкольный музей в последний раз... Администрация школы
+                                    совместно с советом музея уже на протяжении многих лет составляет альбом
+                                    выпускников, в котором размещает фотографии ребят и выпускники оставляют свои слова
+                                    на них. Эта традиция соблюдается много лет и сегодняшний день не стал исключением.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                Бессмертный полк
+                            </h3>
+                            <span class="new__date">
+                                9 мая 2022 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background: center url(/img/new/new-2.jpg); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="/img/new/new-2.jpg" alt="" class="new__img leftimg">
+                                    Бессмертный полк — международная общественная акция, проводящаяся в России и ряде
+                                    стран ближнего и дальнего зарубежья в День Победы, в ходе которой участники идут
+                                    колонной и несут транспаранты с фотопортретами своих родственников, участвовавших в
+                                    Великой Отечественной войне и Второй Мировой войне.
+
+                                    Это возможность сохранить память о Великой победе в сердцах миллионов благодарных
+                                    потомков, дать пример нравственного поведения подрастающему поколению, испытать
+                                    чувство единения и патриотизма.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                Память Сердца
+                            </h3>
+                            <span class="new__date">
+                                26 января 2022 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background: center url(https://lh3.googleusercontent.com/fife/AMPSemfv3VxWfjH6-7Sn0HBkDBs50eqcOy0QzV_yftOlsDVAXEHRwiAEcWxZ8PcUj83az1uWIQ-yDD9mPQ7TC2tn80yAHoggZzaX6DO03msvJtbvPij_cJLmbX1iLR1760AuLRrTGeFLqox1wPVLIBWJ_HGCk0Epvc4rB0GANBFJSmUU0l_AdZgwRpm9qe4zRrQJfhAV4YWvtimUqGtnom2P0QuXpy2gj1THuBzLs4vIyTchGmJvcVtMzCpwsg420TJDJGbvZCyeRyZ47FxqhUlMK7Jm97D4WeD1zloXYZXTaPRtfLIDsYZBSjqZt9_Hg6F4M8yTQYDxTKXlk-9uyUHoC5Fj9nZdYgtocI1yR4gk51wVC0oLFhGk4lTZF12B5kpMbB2_9AE7PdqV7t-HwV4S3kmFQzBqMmEgdSdo6aHz3j5pw32m4tsuP_Qnc69A9xdxIdBZrAZWrQtnrj0T_np_W-1-yNktUNlfKfHI1pjF8_w4U5gngZqK5iIlE5u7YWAmTFmIuvnRPjGcLdGfjDnKS1zua1Z6gfruMJF7LpNs8Vl4eRyBJOPHLEepJD9VYXa4gblIfH3KpbM7thNsgRwZF3pkV_XBokNZLA6nlUG49aiEjeC2EqIO0gkNdXZwRxZHRySIZ8wqYxDJ8BO8dNNkJbl_z7CSHdqleCXjsQvDGrPuzm3uRNuGMt-CWwzDuBQ282qQTPBri38oM3G3Nk5z2-YObgLxqizmmlNzLwpz4O84VO5eEFn8s3cFJMa4oTVTSNfKhHT5s7vhnIkrsFwudHXdUdVNoHZOoWx7AkRgz_-1bHfqb77rdTnGDXBHTOUBngP75kYUZxoqvZYGOXH6g3wVO3qeP5UbbxRgLE8ge-VVe4Yu3r9Q5jvVdmuralSPzRh2tpnpHAfQary-xMIA3DhG41fIvzPNKJR9KzIhhctS2oqR5VJQJz7PcanYQPt1r3mV7ByWtYLqqI6WUEhno98YWHkxh1juoAcauiUWacFuOiIZ4GBtH9-5n8h23fIcSC_s5XpJuZXGxdLi3-2QfNBRLkite2OQqoX7Z39DHyCQJChDjVj0cW8SFsSBbFrn-fxg2RSLDvSACQQuLxLyn-ed1WLX7BC5Co3miWpVMOIp9SCBaGlcziZAX4ZdE3iaBxoK4Rhsqr0OIgJiwKgb61D4XAj67ZJkhZ6cvIidOhxr-ChpYZQF7gtLcdOc0gfZkNjWULpq3Cfkmq2rG5iT4HDXAYjxtRiJ7FATweUxoINwahutura3dBL7JWp-LagcY-rESeq-4xCQ43GZB9bGRYuL44vS97-YQY0JlEQioVc9il4bA3ybrN-R5YHSW8cuSbaWwlknvAXt_cmTK_PlscNpJmI6OJONvtm6oRm9ch_HXuMLUv0usgZ054ouT_dzFW9kGvI0Bs2P3Xx614Q0IzBvqB-Z2WvwM2CrTc2fMO9OvtnlEkdN7koead9xJQ5SEAdZA0ZxkZk83lz90QouGQ=w1920-h904); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="https://lh3.googleusercontent.com/fife/AMPSemfv3VxWfjH6-7Sn0HBkDBs50eqcOy0QzV_yftOlsDVAXEHRwiAEcWxZ8PcUj83az1uWIQ-yDD9mPQ7TC2tn80yAHoggZzaX6DO03msvJtbvPij_cJLmbX1iLR1760AuLRrTGeFLqox1wPVLIBWJ_HGCk0Epvc4rB0GANBFJSmUU0l_AdZgwRpm9qe4zRrQJfhAV4YWvtimUqGtnom2P0QuXpy2gj1THuBzLs4vIyTchGmJvcVtMzCpwsg420TJDJGbvZCyeRyZ47FxqhUlMK7Jm97D4WeD1zloXYZXTaPRtfLIDsYZBSjqZt9_Hg6F4M8yTQYDxTKXlk-9uyUHoC5Fj9nZdYgtocI1yR4gk51wVC0oLFhGk4lTZF12B5kpMbB2_9AE7PdqV7t-HwV4S3kmFQzBqMmEgdSdo6aHz3j5pw32m4tsuP_Qnc69A9xdxIdBZrAZWrQtnrj0T_np_W-1-yNktUNlfKfHI1pjF8_w4U5gngZqK5iIlE5u7YWAmTFmIuvnRPjGcLdGfjDnKS1zua1Z6gfruMJF7LpNs8Vl4eRyBJOPHLEepJD9VYXa4gblIfH3KpbM7thNsgRwZF3pkV_XBokNZLA6nlUG49aiEjeC2EqIO0gkNdXZwRxZHRySIZ8wqYxDJ8BO8dNNkJbl_z7CSHdqleCXjsQvDGrPuzm3uRNuGMt-CWwzDuBQ282qQTPBri38oM3G3Nk5z2-YObgLxqizmmlNzLwpz4O84VO5eEFn8s3cFJMa4oTVTSNfKhHT5s7vhnIkrsFwudHXdUdVNoHZOoWx7AkRgz_-1bHfqb77rdTnGDXBHTOUBngP75kYUZxoqvZYGOXH6g3wVO3qeP5UbbxRgLE8ge-VVe4Yu3r9Q5jvVdmuralSPzRh2tpnpHAfQary-xMIA3DhG41fIvzPNKJR9KzIhhctS2oqR5VJQJz7PcanYQPt1r3mV7ByWtYLqqI6WUEhno98YWHkxh1juoAcauiUWacFuOiIZ4GBtH9-5n8h23fIcSC_s5XpJuZXGxdLi3-2QfNBRLkite2OQqoX7Z39DHyCQJChDjVj0cW8SFsSBbFrn-fxg2RSLDvSACQQuLxLyn-ed1WLX7BC5Co3miWpVMOIp9SCBaGlcziZAX4ZdE3iaBxoK4Rhsqr0OIgJiwKgb61D4XAj67ZJkhZ6cvIidOhxr-ChpYZQF7gtLcdOc0gfZkNjWULpq3Cfkmq2rG5iT4HDXAYjxtRiJ7FATweUxoINwahutura3dBL7JWp-LagcY-rESeq-4xCQ43GZB9bGRYuL44vS97-YQY0JlEQioVc9il4bA3ybrN-R5YHSW8cuSbaWwlknvAXt_cmTK_PlscNpJmI6OJONvtm6oRm9ch_HXuMLUv0usgZ054ouT_dzFW9kGvI0Bs2P3Xx614Q0IzBvqB-Z2WvwM2CrTc2fMO9OvtnlEkdN7koead9xJQ5SEAdZA0ZxkZk83lz90QouGQ=w1920-h904"
+                                        alt="" class="new__img leftimg">
+                                    На всю стрaну извeстен лишь днeвник Тaни Сaвичевой, кoторый сoдержит девять страшных
+                                    строк. Каждая посвящена смерти одного из близких. Последняя запись: «Осталась одна
+                                    Таня». Мы разыскали блокадный дневник другой ленинградской школьницы, Тани
+                                    Вассоевич. Они обе жили на Васильевском острове. Таня Савичева сначала ослепла,
+                                    потом сошла с ума от пережитого и умерла в эвакуации. Скупые строки её дневника
+                                    стали обвинительным документом на Нюрнбергском процессе. Дневники двух Тань — как
+                                    две стороны медали. Тёмная сторона — трагическая смерть, светлая — победа выживших.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                День Неизвестного солдата
+                            </h3>
+                            <span class="new__date">
+                                3 декабря 2021 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background-image: url(https://lh3.googleusercontent.com/fife/AMPSemeS1MbJ0FBYlgLDVqUC4ymJRKqcXEsVL1fwRypqJqm9rccxeAmhWWVTpYqAPvPHPyvNFz94VCtnoXG94Kqn00A94fUAGrygSPkDhzIszf-CBlwZACRes3QesQ5U81mb67lMjtD9bNNE-SEePTJfgGVPk9WMSy4ev74yUNcli0tICyUO1CLJhYH9H0SvsfFziQIigvq1XJot5fvS3GnaDwAszTFnkcgUY59bmDsqw_dAyyCcLD5DzVBgy3_7xoMC5pgrrEw0wRBNWDP2yBElc4V0-zW1RMLeqf1gYX1GxSmJn0GCl87kf3OAY1ALlSescXpSWPtt23sNXl3wQLjC6KCbWxwQS8Q8Jv0wKOGR4OZjCCOPHVyn-e0QFzH2Quhb5mabsMikmfdg9IPwBbbkTMS0JJ5xRGuYz78iMeHVBAsMkgj5gP_UpHZpkYRr8lk1FeWUwMHf2CZJs2yjFcDBpLdEZYIOT2DttNSQJHEONKRFKk60dHHzrNfD_uOhK8YWb1gioCLgLgIee0MTEVpyIYZ7KFwheYyFxeMlx1axX0M3K8hHefgdTjX1SzC18U2zSRVB7Je44spWwbQF2eJewjX5o59-aRsQiu38nPdzz36Pbs7BiWzV6UmgvRdjtv5MlY-ov1E__KTMXAYL1ILjEB53OhcOnouWGsPh4yOsXJNyEarHGqBDTC6E7VKFG1x1T8jkBhqDvNic-Evzi0pAES0t6BMzgePYVzRjL0kelGAOzCsuZUjoZtap29Xtat4yLmpWVgl8EgdYhMNziyS0WOwKSSOdTOVj_91OE5ZHQK_tXZYqUj5vGcZw1p2NldsnFtxSm6FVU1piZMP_n3GDZYGgJop1vN8Q4xwzIIdSsfWss7OHiYGzCc-q4Va2BW-1nYrm5sAVXnatvSvxrjruTg9n2j0PgX8fcDk8zzSildO18In0nHHLXSFgGaoA1A3Nah1Sek1mYC1z-0_u899mFyQgrugN3mdZXRmApQoAz0qka7pPCJzmPRFU44JJOXTbJUr4Elr6wRKHXbWfu8OTwWdjLJSsR2GnVxOVJiiiIbGz2GinEx2YnrW7n6CdbYsTYgk4tozF6jj9oRoy7CQ2zcy5v-mVyp_TgzBLskTnZMU3XgpjOp7caMPYd2TiSUd5NauEEs_M9emMJu2FzRXFnMGSA3B4ku_ye-RXZqL1PAqHabcJ1G5jMUz-O6W4XFpg2mCmwc_ybqQw9PT622sRvDUPzLUI1Ay2Hc96cj9iHCcMNU1eKfaWxVf75PwFHr8lEeS41_z0xBr91UzX08Q0gnHcyvQ5D6CZ4Qph_r_NmCnHQnYBUfHYPVO5_YsfJyNelx6Xwfbt7-SzN047OKEPanRHaU9NX9k-yzePtraKaYxwjGFBy6K5-bnkPBZKYJqu-xAFRDh24B5FrDuNx33CmAyODmTQpZnkn1f_hII9Ur_vwFv6Sk0Jrg8EqG_hkFmXk8xRVBWkbsybpQ-EzNn6yA=w1920-h904); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="https://lh3.googleusercontent.com/fife/AMPSemeS1MbJ0FBYlgLDVqUC4ymJRKqcXEsVL1fwRypqJqm9rccxeAmhWWVTpYqAPvPHPyvNFz94VCtnoXG94Kqn00A94fUAGrygSPkDhzIszf-CBlwZACRes3QesQ5U81mb67lMjtD9bNNE-SEePTJfgGVPk9WMSy4ev74yUNcli0tICyUO1CLJhYH9H0SvsfFziQIigvq1XJot5fvS3GnaDwAszTFnkcgUY59bmDsqw_dAyyCcLD5DzVBgy3_7xoMC5pgrrEw0wRBNWDP2yBElc4V0-zW1RMLeqf1gYX1GxSmJn0GCl87kf3OAY1ALlSescXpSWPtt23sNXl3wQLjC6KCbWxwQS8Q8Jv0wKOGR4OZjCCOPHVyn-e0QFzH2Quhb5mabsMikmfdg9IPwBbbkTMS0JJ5xRGuYz78iMeHVBAsMkgj5gP_UpHZpkYRr8lk1FeWUwMHf2CZJs2yjFcDBpLdEZYIOT2DttNSQJHEONKRFKk60dHHzrNfD_uOhK8YWb1gioCLgLgIee0MTEVpyIYZ7KFwheYyFxeMlx1axX0M3K8hHefgdTjX1SzC18U2zSRVB7Je44spWwbQF2eJewjX5o59-aRsQiu38nPdzz36Pbs7BiWzV6UmgvRdjtv5MlY-ov1E__KTMXAYL1ILjEB53OhcOnouWGsPh4yOsXJNyEarHGqBDTC6E7VKFG1x1T8jkBhqDvNic-Evzi0pAES0t6BMzgePYVzRjL0kelGAOzCsuZUjoZtap29Xtat4yLmpWVgl8EgdYhMNziyS0WOwKSSOdTOVj_91OE5ZHQK_tXZYqUj5vGcZw1p2NldsnFtxSm6FVU1piZMP_n3GDZYGgJop1vN8Q4xwzIIdSsfWss7OHiYGzCc-q4Va2BW-1nYrm5sAVXnatvSvxrjruTg9n2j0PgX8fcDk8zzSildO18In0nHHLXSFgGaoA1A3Nah1Sek1mYC1z-0_u899mFyQgrugN3mdZXRmApQoAz0qka7pPCJzmPRFU44JJOXTbJUr4Elr6wRKHXbWfu8OTwWdjLJSsR2GnVxOVJiiiIbGz2GinEx2YnrW7n6CdbYsTYgk4tozF6jj9oRoy7CQ2zcy5v-mVyp_TgzBLskTnZMU3XgpjOp7caMPYd2TiSUd5NauEEs_M9emMJu2FzRXFnMGSA3B4ku_ye-RXZqL1PAqHabcJ1G5jMUz-O6W4XFpg2mCmwc_ybqQw9PT622sRvDUPzLUI1Ay2Hc96cj9iHCcMNU1eKfaWxVf75PwFHr8lEeS41_z0xBr91UzX08Q0gnHcyvQ5D6CZ4Qph_r_NmCnHQnYBUfHYPVO5_YsfJyNelx6Xwfbt7-SzN047OKEPanRHaU9NX9k-yzePtraKaYxwjGFBy6K5-bnkPBZKYJqu-xAFRDh24B5FrDuNx33CmAyODmTQpZnkn1f_hII9Ur_vwFv6Sk0Jrg8EqG_hkFmXk8xRVBWkbsybpQ-EzNn6yA=w1920-h904"
+                                        alt="" class="leftimg new__img">
+                                    Cегодня юные краеведы школы провели лекцию для учащихся начальной и средней школы ко
+                                    дню Неизвестного солдата. Если открыть любую изданную в нашей стране «Книгу Памяти»,
+                                    то напротив фамилий огромного числа советских солдат, не вернувшихся с Великой
+                                    Отечественной войны, написано — «пропал без вести». Далеко не у всех тех, кто
+                                    числится убитым, указано место захоронения. Эти бойцы и командиры Красной Армии так
+                                    и остались лежать там, где их настигла смерть: в обвалившихся блиндажах, в
+                                    засыпанных окопах или воронках, а порой и под открытым небом.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="news__item">
+                            <h3 class="new__title">
+                                Добрый город
+                            </h3>
+                            <span class="new__date">
+                                39 апреля 2021 г.
+                            </span>
+                            <div class="new__photoText flex">
+                                <div style="background: center url(/img/new/new-3.jpg); background-size: cover;"
+                                    class="new__photobg">
+
+                                </div>
+                                <p class="new__descr">
+                                    <img src="/img/new/new-3.jpg" alt="" class="new__img leftimg">
+                                    В игре участвовали 6 команд, которые в течение часа посетили 7 станций в строгом
+                                    соответствии с маршрутным листом, выполнив в указанные сроки предложенные мастерами
+                                    станций задания. Выпускники - организаторы, мастера команд и станций, а так же
+                                    арбитры игры - строго следили за соблюдением правил и при подведении итогов
+                                    определили статус каждой команды в соответствии с ключевым словом игры ДОБРОТА. Наш
+                                    музей выступил исторической станцией, где ребята отвечали на вопросы о нашей школе.
+                                </p>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+                <a href="#" id="loadMore">Просмотреть ещё</a>
+            </div>
+        </section>
+        <section class="contacts" id="contacts">
+            <div class="container">
+                <h3 class="contacts__address">
+                    347879, Россия, Ростовская область,
+                    г. Гуково, ул. Молодежная, д. 17
+                </h3>
+                <div class="contacts__connection flex">
+                    <a class="contacts__email" href="mailto:chuprikova.2020@inbox.ru">chuprikova.2020@inbox.ru</a>
+                    <a class="contacts__tel" href="tel:8(86361) 5-09-39">8(86361) 5-09-39</a>
+                </div>
+                <div class="contacts__links flex">
+                    <a href="#" class="contacts__site">Сайт нашей школы</a>
+                    <a href="#" class="contacts__vk">Мы в ВК</a>
+                </div>
+            </div>
+        </section>
+        <div id="map" class="map" style="width: 100%; "></div>
+        <div class="modal">
+            <div class="modal__container flex" data-target="modal-first">
+                <button class="modal-close btn-reset">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M0.666641 15.3043L15.3333 3.17761e-05L16 0.695679L1.33331 15.9999L0.666641 15.3043Z"
+                            fill="black" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M0.666725 -2.96187e-06L15.3334 15.3042L14.6667 15.9999L5.76143e-05 0.695644L0.666725 -2.96187e-06Z"
+                            fill="black" />
+                    </svg>
+                </button>
+                <div class="modal-content">
+                    <h2 class="modal-title">К сожалению этот элемент ещё в разработке, но мы работаем над этим и скоро
+                        здесь появится что-то интересное!</h2>
+                    <img src="/img/modal.png" alt="" class="modal-img">
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="footer">
+        <div class="container">
+            <a href="#" class="footer__link">
+                <img class="header__logo" src="/img/logo.png" alt="Лого">
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

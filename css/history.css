@@ -1,0 +1,135 @@
+.history {
+    background-image: url(/img/history-bg.jpg);
+    background-color: black;
+    height: 500px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    padding: 67px 0;
+}
+
+.history__title {
+    font-style: normal;
+font-weight: 700;
+font-size: 37px;
+line-height: 42px;
+margin-bottom: 30px;
+color: #FFFFFF;
+}
+
+.history__descr {
+    font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 23px;
+text-align: justify;
+color: #FFFFFF;
+}
+
+.history__info {
+    max-width: 48%;
+    /* padding: ; */
+}
+
+.hslide-1 {
+    background-image: url(../img/history/hist-1.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.hslide-2 {
+    background-image: url(../img/history/hist-2.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.hslide-3 {
+    background-image: url(../img/history/hist-3.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.hslide-4 {
+    background-image: url(../img/history/hist-4.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.hslide-5 {
+    background-image: url(../img/history/hist-5.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.hslide-6 {
+    background-image: url(../img/history/hist-6.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.history .container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.history__img {
+    width: 550px;
+    height: 367px;
+    position: relative;
+}
+
+.swiper.history__swiper {
+    position: absolute;
+    top: 0px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    height: 367px;
+    background-color: black;
+  }
+
+  @media (max-width:1360px ) {
+    .history__title {
+        margin-bottom: 15px;
+    }
+
+    .history__img {
+        width: 430px;
+
+    }
+
+    .history__descr {
+        font-size: 16px;
+    }
+  }
+
+  @media (max-width: 920px) {
+    .history {
+        height: auto;
+    }
+
+    .history .container {
+        flex-direction: column;
+    }
+
+    .history__info, .history__img {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .history__info {
+        margin-bottom: 15px;
+    }
+  }
+
+  @media (max-width: 650px) {
+    .history__title {
+        font-size: 33px;
+    }
+
+    .history__descr {
+        font-size: 14px;
+    }
+  }
